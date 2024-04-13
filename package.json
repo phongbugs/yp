@@ -1,14 +1,15 @@
 {
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12"
+  },
   "name": "yp",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "main": "yp.js",
+  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "sequelize-cli": "^6.6.2"
-  }
+  "description": ""
 }
