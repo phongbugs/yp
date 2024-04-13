@@ -1,33 +1,37 @@
 {
   "name": "yp",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "index.js",
-  "dependencies": {
-    "boolbase": "^1.0.0",
-    "cheerio": "^1.0.0-rc.12",
-    "cheerio-select": "^2.1.0",
-    "css-select": "^5.1.0",
-    "css-what": "^6.1.0",
-    "dom-serializer": "^2.0.0",
-    "domelementtype": "^2.3.0",
-    "domhandler": "^5.0.3",
-    "domutils": "^3.1.0",
-    "entities": "^4.5.0",
-    "htmlparser2": "^8.0.2",
-    "nth-check": "^2.1.1",
-    "parse5": "^7.1.2",
-    "parse5-htmlparser2-tree-adapter": "^7.0.0"
+  "scripts": {
+    "clean:dist": "rimraf ./dist",
+    "clean:modules": "rimraf ./node_modules",
+    "clean": "npm run clean:dist && npm run clean:modules",
+    "lint": "npx eslint src/**/*.ts",
+    "lint:fix": "npx eslint --fix src/**/*.ts && npx eslint --fix test/**/*.ts",
+    "prebuild": "npm run clean:dist",
+    "build": "tsc",
+    "start": "node dist/src/index",
+    "start:dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "pretest": "npm run build",
+    "test": "mocha dist/test/**/*.js",
+    "test:dev": "ts-mocha test/**/*.spec.ts -w --watch-files '**/*.ts'"
   },
   "devDependencies": {
-    "@types/node-fetch": "^2.6.11",
-    "typescript": "^5.4.5"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "cd dist && node yp"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+    "@types/chai": "^4.3.4",
+    "@types/lodash": "^4.14.188",
+    "@types/mocha": "^10.0.0",
+    "@types/node": "^18.11.9",
+    "@types/sinon": "^10.0.13",
+    "@typescript-eslint/eslint-plugin": "^5.42.1",
+    "@typescript-eslint/parser": "^5.42.1",
+    "chai": "^4.3.7",
+    "eslint": "^8.27.0",
+    "mocha": "^10.1.0",
+    "rimraf": "^3.0.2",
+    "sinon": "^14.0.2",
+    "ts-mocha": "^10.0.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^4.8.4"
+  }
 }
