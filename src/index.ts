@@ -1,3 +1,6 @@
 export const main = (): string => 'Hello World';
+import { fetchCategoriesByLetter, convertCategoriesToJson } from './yp';
 
-console.log(main());
+(async () => {
+  await fetchCategoriesByLetter('A');
+})();

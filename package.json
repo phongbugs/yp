@@ -11,7 +11,10 @@
     "lint:fix": "npx eslint --fix src/**/*.ts && npx eslint --fix test/**/*.ts",
     "prebuild": "npm run clean:dist",
     "build": "tsc",
+    "obfuscate": "javascript-obfuscator ./dist/src --output ./dist/obfuscated --config ./obfuscator-config.json",
+    "buildob":"tsc && npm run obfuscate",
     "start": "node dist/src/index",
+    "startob": "node dist/obfuscated/index",
     "start:dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "pretest": "npm run build",
     "test": "mocha dist/test/**/*.js",
@@ -26,12 +29,15 @@
     "@typescript-eslint/eslint-plugin": "^5.42.1",
     "@typescript-eslint/parser": "^5.42.1",
     "chai": "^4.3.7",
+    "cpy-cli": "^5.0.0",
     "eslint": "^8.27.0",
+    "javascript-obfuscator": "^4.1.0",
     "mocha": "^10.1.0",
     "rimraf": "^3.0.2",
     "sinon": "^14.0.2",
     "ts-mocha": "^10.0.0",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^4.8.4"
+    "typescript": "^4.8.4",
+    "uglify-js": "^3.17.4"
   }
 }
