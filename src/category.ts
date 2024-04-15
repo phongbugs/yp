@@ -2,31 +2,9 @@ const ypHost: string = 'https://yellowpages.vn';
 
 import fetch from 'node-fetch';
 import { load } from 'cheerio';
-import * as fs from 'fs';
-import './utils'
-import {Category, log} from './interface';
-
-function writeToFile(
-  fileName: string,
-  data: string,
-  callback: ((error: NodeJS.ErrnoException | null) => void) | null = null
-): void {
-  fs.writeFile(fileName, data, (err) => {
-    if (err) {
-      console.error('Error writing file:', err);
-    } else {
-      console.log(`${fileName} has been successfully written!`);
-    }
-    if (callback) {
-      callback(err);
-    }
-  });
-}
-interface HTMLPageResponse {
-  html: string;
-  pageCount: number;
-}
-
+import './extensions'
+import {Category, HTMLPageResponse} from './interface';
+import { log } from 'console';
 async function fetchHTMLCategoriesByLetter(
   letter: string,
   pageIndex: number
@@ -89,7 +67,7 @@ async function fetchCategoriesAZ(): Promise<{ [letter: string]: any[] }> {
   // Loop through letters from A to Z
   for (
     let letter = 'A';
-    letter <= 'Z';
+    letter <= 'A';
     letter = String.fromCharCode(letter.charCodeAt(0) + 1)
   ) {
     try {
@@ -101,4 +79,4 @@ async function fetchCategoriesAZ(): Promise<{ [letter: string]: any[] }> {
   return categoriesByLetter;
 }
 
-export { fetchCategoriesAZ, writeToFile };
+export { fetchCategoriesAZ };

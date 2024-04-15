@@ -1,5 +1,9 @@
-import { SubCategory, log } from './interface';
-
+import { Category, SubCategory } from './interface';
+import { load } from 'cheerio';
+import './utils';
+import './extensions'
+import { log } from 'console';
+import { writeToFile } from './utils';
 async function fetchHTMLSubCategory(url: string): Promise<string> {
   try {
     log(url);
@@ -13,3 +17,54 @@ async function fetchHTMLSubCategory(url: string): Promise<string> {
     throw error; // Re-throw the error to propagate it up the call stack
   }
 }
+
+async function fetchJSONSubCategories(url: string): Promise<SubCategory[]> {
+  let html = await fetchHTMLSubCategory(url);
+  let subCategories = parseHTMLSubCategories(html);
+  return subCategories;
+}
+
+function parseHTMLSubCategories(html: string): SubCategory[] {
+  const $ = load(html);
+  const subCategories: SubCategory[] = [];
+  $('.m-0 .pt-4').each((index, element) => {
+    log($(element).html())
+    const category: SubCategory = {
+      name: $(element).find('a').text().trim().clean(),
+      href: $(element).find('a').attr('href'),
+    };
+    subCategories.push(category);
+  });
+  return subCategories;
+}
+
+async function appendSubCategory(categoriesByLetter: {
+  [letter: string]: Category[];
+}): Promise<{ [letter: string]: any[] }> {
+  for (let letter in categoriesByLetter) {
+    // Access each array corresponding to the current letter
+    let categoryArray = categoriesByLetter[letter];
+
+    // Iterate over each object in the array
+    let subCategories: SubCategory[] = [];
+    let subCategoryIndex = 0;
+    for (let category of categoryArray) {
+      try {
+        let html = await fetchHTMLSubCategory(category.href);
+        writeToFile(category.href.split('/').pop(), html)
+        subCategories = parseHTMLSubCategories(html);
+        categoriesByLetter[letter][subCategoryIndex].subCategories =
+          subCategories;
+        subCategoryIndex++;
+        log(categoriesByLetter[letter][subCategoryIndex].subCategories)
+      } catch (error) {
+        // Handle any errors that might occur
+        console.error('Error processing category:', error);
+      }
+    }
+  }
+  // Return the modified categoriesByLetter object
+  return categoriesByLetter;
+}
+
+export { appendSubCategory };

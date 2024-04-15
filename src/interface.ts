@@ -8,6 +8,10 @@ interface Category {
   href: string;
   subCategories: SubCategory[];
 }
-const log = console.log;
-export {Category, SubCategory, log}
+
+interface HTMLPageResponse {
+  html: string;
+  pageCount: number;
+}
+export {Category, SubCategory, HTMLPageResponse}
 

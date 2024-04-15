@@ -1,13 +1,19 @@
-declare global {
-  interface String {
-    clean(): string;
-  }
-}
+import * as fs from 'fs';
 
-String.prototype.clean = function (): string {
-  return this.replace(/\t/g, ' ')
-    .replace(/\n/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-};
-export {};
+function writeToFile(
+  fileName: string,
+  data: string,
+  callback: ((error: NodeJS.ErrnoException | null) => void) | null = null
+): void {
+  fs.writeFile(fileName, data, (err) => {
+    if (err) {
+      console.error('Error writing file:', err);
+    } else {
+      console.log(`${fileName} has been successfully written!`);
+    }
+    if (callback) {
+      callback(err);
+    }
+  });
+}
+export { writeToFile };
