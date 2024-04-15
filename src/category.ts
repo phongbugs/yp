@@ -67,7 +67,7 @@ async function fetchCategoriesAZ(): Promise<{ [letter: string]: any[] }> {
   // Loop through letters from A to Z
   for (
     let letter = 'A';
-    letter <= 'A';
+    letter <= 'Z';
     letter = String.fromCharCode(letter.charCodeAt(0) + 1)
   ) {
     try {

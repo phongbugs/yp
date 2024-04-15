@@ -1,13 +1,15 @@
 export const main = (): string => 'Hello World';
 import { fetchCategoriesAZ } from './category';
 import { appendSubCategory } from './subcategory';
+import { fetchJSONAllBussiness } from './business';
 import { writeToFile } from './utils';
-(async () => {
-  //let html = await fetchCategoriesByLetter('A');
-  //writeToFile('aa.html', html)
-  //let categories = parseHTMLCategoriesByLetter(html)
-  //console.log(categories);
+
+async function fetchAllCategories(){
   let categories = await fetchCategoriesAZ();
   categories = await appendSubCategory(categories);
-  writeToFile('./categories3.json', JSON.stringify(categories));
+  writeToFile('./all.json', JSON.stringify(categories));
+}
+(async () => {
+  //await fetchAllCategories();
+  await fetchJSONAllBussiness('https://yellowpages.vn/cls/489262/ac-quy-o-to.html')
 })();

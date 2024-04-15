@@ -1,7 +1,7 @@
 import { Category, SubCategory } from './interface';
 import { load } from 'cheerio';
 import './utils';
-import './extensions'
+import './extensions';
 import { log } from 'console';
 import { writeToFile } from './utils';
 async function fetchHTMLSubCategory(url: string): Promise<string> {
@@ -27,13 +27,20 @@ async function fetchJSONSubCategories(url: string): Promise<SubCategory[]> {
 function parseHTMLSubCategories(html: string): SubCategory[] {
   const $ = load(html);
   const subCategories: SubCategory[] = [];
-  $('.m-0 .pt-4').each((index, element) => {
-    log($(element).html())
+  const elements = $('.m-0.pt-4')
+    .filter(function () {
+      const classAttributeValue = $(this).attr('class');
+      return classAttributeValue && classAttributeValue.split(' ').length === 2;
+    })
+    .slice(1)
+    .remove();
+
+  elements.each((index, element) => {
     const category: SubCategory = {
       name: $(element).find('a').text().trim().clean(),
       href: $(element).find('a').attr('href'),
     };
-    subCategories.push(category);
+    if (category.name && category.href) subCategories.push(category);
   });
   return subCategories;
 }
@@ -51,17 +58,18 @@ async function appendSubCategory(categoriesByLetter: {
     for (let category of categoryArray) {
       try {
         let html = await fetchHTMLSubCategory(category.href);
-        writeToFile(category.href.split('/').pop(), html)
+        writeToFile(category.href.split('/').pop(), html);
         subCategories = parseHTMLSubCategories(html);
         categoriesByLetter[letter][subCategoryIndex].subCategories =
           subCategories;
         subCategoryIndex++;
-        log(categoriesByLetter[letter][subCategoryIndex].subCategories)
+        //log(categoriesByLetter[letter][subCategoryIndex].subCategories)
       } catch (error) {
         // Handle any errors that might occur
         console.error('Error processing category:', error);
       }
     }
+    writeToFile('./data/category/' + letter + '.json', JSON.stringify(categoriesByLetter[letter], null, 2));
   }
   // Return the modified categoriesByLetter object
   return categoriesByLetter;

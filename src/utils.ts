@@ -5,7 +5,7 @@ function writeToFile(
   data: string,
   callback: ((error: NodeJS.ErrnoException | null) => void) | null = null
 ): void {
-  fs.writeFile(fileName, data, (err) => {
+  fs.appendFile(fileName, data, (err) => {
     if (err) {
       console.error('Error writing file:', err);
     } else {
