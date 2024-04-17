@@ -1,6 +1,4 @@
 const ypHost: string = 'https://yellowpages.vn';
-
-import fetch from 'node-fetch';
 import { load } from 'cheerio';
 import './extensions'
 import {Category, HTMLPageResponse} from './interface';

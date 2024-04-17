@@ -11,5 +11,5 @@ async function fetchAllCategories(){
 }
 (async () => {
   //await fetchAllCategories();
-  await fetchJSONAllBussiness('https://yellowpages.vn/cls/489262/ac-quy-o-to.html')
+  await fetchJSONAllBussiness('https://yellowpages.vn/cls/25960/ac-quy-nha-cung-cap-ac-quy.html')
 })();
