@@ -1,9 +1,9 @@
 import { Category, SubCategory } from './interface';
 import { load } from 'cheerio';
-import './utils';
 import './extensions';
 import { log } from 'console';
 import { writeToFile } from './utils';
+
 async function fetchHTMLSubCategory(url: string): Promise<string> {
   try {
     log(url);
@@ -49,10 +49,7 @@ async function appendSubCategory(categoriesByLetter: {
   [letter: string]: Category[];
 }): Promise<{ [letter: string]: any[] }> {
   for (let letter in categoriesByLetter) {
-    // Access each array corresponding to the current letter
     let categoryArray = categoriesByLetter[letter];
-
-    // Iterate over each object in the array
     let subCategories: SubCategory[] = [];
     let subCategoryIndex = 0;
     for (let category of categoryArray) {
@@ -63,9 +60,7 @@ async function appendSubCategory(categoriesByLetter: {
         categoriesByLetter[letter][subCategoryIndex].subCategories =
           subCategories;
         subCategoryIndex++;
-        //log(categoriesByLetter[letter][subCategoryIndex].subCategories)
       } catch (error) {
-        // Handle any errors that might occur
         console.error('Error processing category:', error);
       }
     }

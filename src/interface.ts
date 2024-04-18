@@ -14,7 +14,7 @@ interface Business {
   isVerify: boolean,
   diamondCount: number
   category: string,
-  datemodified: string,
+  dateModified: string,
   address: string,
   phone: string,
   email: string,
