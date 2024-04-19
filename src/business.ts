@@ -1,9 +1,9 @@
 import { load } from 'cheerio';
 import './extensions';
-import { Business, HTMLPageResponse } from './interface';
+import { Business, Category, HTMLPageResponse, SubCategory } from './interface';
 import { log } from 'console';
 import './utils';
-import { writeToFile } from './utils';
+import { createFolder, writeToFile } from './utils';
 async function fetchHTMLBusiness(
   url: string,
   pageIndex: number
@@ -113,5 +113,30 @@ async function fetchJSONAllBussiness(url: string): Promise<Business[]> {
   }
   return businesses;
 }
-
-export { fetchJSONAllBussiness };
+async function fetchBusinessesAZ(categories :{ [letter: string]: Category[] }): Promise<void> {
+  for (
+    let letter = 'A';
+    letter <= 'Z';
+    letter = String.fromCharCode(letter.charCodeAt(0) + 1)
+  ) {
+    try {
+     let categoryArray = categories[letter];
+     createFolder('./data/business/' + letter)
+     for (let category of categoryArray) {
+       try {
+        let businessesOfCategory = await fetchJSONAllBussiness(category.href);
+        writeToFile('./data/business/' + letter + '/' + category.name + '.json', JSON.stringify(businessesOfCategory, null, 2));
+        for(let subCategory of category.subCategories){
+          let businessesOfSubCategories = await fetchJSONAllBussiness(subCategory.href);
+          writeToFile('./data/business/' + letter + '/' + subCategory.name + '.json', JSON.stringify(businessesOfSubCategories, null, 2));
+        }
+       } catch (error) {
+         console.error('Error processing category:', error);
+       }
+     }
+    } catch (error) {
+      console.error(`Error fetching categories for letter ${letter}:`, error);
+    }
+  }
+}
+export { fetchJSONAllBussiness , fetchBusinessesAZ};

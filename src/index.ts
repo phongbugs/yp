@@ -1,9 +1,10 @@
 export const main = (): string => 'Hello World';
 import { fetchCategoriesAZ } from './category';
 import { appendSubCategory } from './subcategory';
-import { fetchJSONAllBussiness } from './business';
+import { fetchBusinessesAZ } from './business';
 import { writeToFile } from './utils';
-
+import {categoriesByLetter} from './subcategories';
+import { log } from 'console';
 async function fetchAllCategories() {
   let categories = await fetchCategoriesAZ();
   categories = await appendSubCategory(categories);
@@ -11,8 +12,10 @@ async function fetchAllCategories() {
 }
 (async () => {
   //await fetchAllCategories();
-  let businesses = await fetchJSONAllBussiness(
-    'https://yellowpages.vn/cls/25960/ac-quy-nha-cung-cap-ac-quy.html'
-  );
-  writeToFile('./data/business.json', JSON.stringify(businesses, null, 2));
+  // let businesses = await fetchJSONAllBussiness(
+  //   'https://yellowpages.vn/cls/25960/ac-quy-nha-cung-cap-ac-quy.html'
+  // );
+  // writeToFile('./data/business.json', JSON.stringify(businesses, null, 2));
+  await fetchBusinessesAZ(categoriesByLetter);
+  //console.log(categoriesByLetter);
 })();
