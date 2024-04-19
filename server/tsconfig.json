@@ -5,6 +5,9 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "dist",
+    "esModuleInterop": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true
   },
   "include": [
     "src/**/*",
