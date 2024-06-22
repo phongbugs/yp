@@ -39,5 +39,15 @@ async function createFolder(directoryPath) {
     }
   }
 }
+async function readFile(fileName: string): Promise<string> {
+  try {
+    const data = await fs.promises.readFile(fileName, 'utf8');
+    console.log(`${fileName} has been successfully read!`);
+    return data;
+  } catch (err) {
+    console.error('Error reading file:', err);
+    throw err;
+  }
+}
 
-export { writeToFile, createFolder };
+export { writeToFile, createFolder , readFile};

@@ -70,4 +70,31 @@ async function appendSubCategory(categoriesByLetter: {
   return categoriesByLetter;
 }
 
+// Remove some subCategories has href = province
+// async function filterCategories(categories :{ [letter: string]: Category[] }): Promise<void> {
+//   for (
+//     let letter = 'A';
+//     letter <= 'Z';
+//     letter = String.fromCharCode(letter.charCodeAt(0) + 1)
+//   ) {
+//     try {
+//      let categoryArray = categories[letter];
+//      for (let category of categoryArray) {
+//        try {
+//         let businessesOfCategory = await fetchJSONAllBussiness(category.href);
+//         writeToFile('./data/business/' + letter + '/' + category.name + '.json', JSON.stringify(businessesOfCategory, null, 2));
+//         for(let subCategory of category.subCategories){
+//           let businessesOfSubCategories = await fetchJSONAllBussiness(subCategory.href);
+//           writeToFile('./data/business/' + letter + '/' + subCategory.name + '.json', JSON.stringify(businessesOfSubCategories, null, 2));
+//         }
+//        } catch (error) {
+//          console.error('Error processing category:', error);
+//        }
+//      }
+//     } catch (error) {
+//       console.error(`Error fetching categories for letter ${letter}:`, error);
+//     }
+//   }
+// }
+
 export { appendSubCategory };
