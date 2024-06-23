@@ -1,7 +1,7 @@
 export const main = (): string => 'Hello World';
 import { fetchCategoriesAZ } from './category';
 import { appendSubCategory } from './subcategory';
-import { detectLiveEmailAZ, fetchBusinessesAZ } from './business';
+import { detectLiveEmailAZ, fetchBusinessesAZ, getMailFromBusinessAZ } from './business';
 import { writeToFile } from './utils';
 import { categoriesByLetter } from './subcategories';
 import { categoriesByLetterTpHCM } from './subcategories.tphcm';
@@ -53,7 +53,8 @@ function filterCategoriesByCity(
   // );
   // writeToFile('./data/business.json', JSON.stringify(businesses, null, 2));
 
-  await fetchBusinessesAZ(categoriesByLetterVN);
+  //await fetchBusinessesAZ(categoriesByLetterVN);
+  await getMailFromBusinessAZ(categoriesByLetterVN, 'Hồ Chí Minh', 'Quận Gò Vấp');
   //await detectLiveEmailAZ(categoriesByLetterTpHCM);
   //await fetchBusinessesEmailAZ(categoriesByLetterTpHCM);
 
