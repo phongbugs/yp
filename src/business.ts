@@ -122,26 +122,26 @@ async function fetchBusinessesAZ(categories :{ [letter: string]: Category[] }): 
     try {
      let categoryArray = categories[letter];
      createFolder('./data/business/' + letter)
-     createFolder('./data/mails/' + letter)
+     //createFolder('./data/mails/' + letter)
      for (let category of categoryArray) {
        try {
-        //let businessesOfCategory = await fetchJSONAllBusiness(category.href);
-        //writeToFile('./data/business/' + letter + '/' + category.name + '.json', JSON.stringify(businessesOfCategory, null, 2));
+        let businessesOfCategory = await fetchJSONAllBusiness(category.href);
+        writeToFile('./data/business/' + letter + '/' + category.name + '.json', JSON.stringify(businessesOfCategory, null, 2));
         for(let subCategory of category.subCategories){
           let businessesOfSubCategories = await fetchJSONAllBusiness(subCategory.href);
           writeToFile('./data/business/' + letter + '/' + subCategory.name + '.json', JSON.stringify(businessesOfSubCategories, null, 2));
-            const emailList = businessesOfSubCategories
-              .map((business) => business.email)
-              .filter((email) => isValidEmail(email))
-              .join('\n');
+            // const emailList = businessesOfSubCategories
+            //   .map((business) => business.email)
+            //   .filter((email) => isValidEmail(email))
+            //   .join('\n');
 
-            function isValidEmail(email: string): boolean {
-              // Use a regular expression to validate the email format
-              const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-              return emailRegex.test(email) && !email.startsWith("...");
-            }
+            // function isValidEmail(email: string): boolean {
+            //   // Use a regular expression to validate the email format
+            //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            //   return emailRegex.test(email) && !email.startsWith("...");
+            // }
 
-            writeToFile('./data/mails/' + letter + '/' + subCategory.name + '.txt', emailList);
+            // writeToFile('./data/mails/' + letter + '/' + subCategory.name + '.txt', emailList);
         }
        } catch (error) {
          console.error('Error processing category:', error);
@@ -152,8 +152,46 @@ async function fetchBusinessesAZ(categories :{ [letter: string]: Category[] }): 
     }
   }
 }
+function isValidEmail(email: string): boolean {
+    // Use a regular expression to validate the email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email) && !email.startsWith("...");
+}
+async function getMailFromBusinessAZ(categories: { [letter: string]: Category[] }, city: string, district: string): Promise<void> {
+    for (
+        let letter = 'A';
+        letter <= 'Z';
+        letter = String.fromCharCode(letter.charCodeAt(0) + 1)
+    ) {
+        try {
+            let categoryArray = categories[letter];
+            for (let category of categoryArray) {
+                try {
+                    let businessesOfCategory = JSON.parse(await readFile('./data/business/' + letter + '/' + category.name + '.json'));
+                    const emailList = businessesOfCategory
+                           .map((business) => business.email)
+                           .filter((email) => isValidEmail(email))
+                           .join('\n');
+                    //writeToFile('./data/business/' + letter + '/' + category.name + '.json', JSON.stringify(businessesOfCategory, null, 2));
+                    for (let subCategory of category.subCategories) {
+                        let businessesOfSubCategories = await fetchJSONAllBusiness(subCategory.href);
+                        writeToFile('./data/business/' + letter + '/' + subCategory.name + '.json', JSON.stringify(businessesOfSubCategories, null, 2));
+                        
 
-async function detectLiveEmailAZ(categories :{ [letter: string]: Category[] }): Promise<void> {
+
+                        // writeToFile('./data/mails/' + letter + '/' + subCategory.name + '.txt', emailList);
+                    }
+                } catch (error) {
+                    console.error('Error processing category:', error);
+                }
+            }
+        } catch (error) {
+            console.error(`Error fetching categories for letter ${letter}:`, error);
+        }
+    }
+}
+
+async function getMailFromBusinessAZ2(categories :{ [letter: string]: Category[] }, city: string, district: string): Promise<void> {
   for (
     let letter = 'A';
     letter <= 'B';
@@ -181,4 +219,4 @@ async function detectLiveEmailAZ(categories :{ [letter: string]: Category[] }): 
     }
   }
 }
-export { fetchJSONAllBusiness , fetchBusinessesAZ, fetchHTMLBusiness, detectLiveEmailAZ};
+export { fetchJSONAllBusiness , fetchBusinessesAZ, fetchHTMLBusiness};

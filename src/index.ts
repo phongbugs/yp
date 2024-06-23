@@ -5,10 +5,12 @@ import { detectLiveEmailAZ, fetchBusinessesAZ } from './business';
 import { writeToFile } from './utils';
 import { categoriesByLetter } from './subcategories';
 import { categoriesByLetterTpHCM } from './subcategories.tphcm';
+import { categoriesByLetterVN } from './subcategories.vn';
 import { Category } from './interface';
 import { log } from 'console';
 import * as fs from 'fs';
 import { fetchBusinessesEmailAZ } from './mail.copilot';
+
 async function fetchAllCategories() {
   let categories = await fetchCategoriesAZ();
   categories = await appendSubCategory(categories);
@@ -26,7 +28,7 @@ function filterCategoriesByCity(
       const filtered = categories[letter]
         .map((category) => {
           const filteredSubCategories = category.subCategories.filter(
-            (subCategory) => subCategory.name.includes(city)
+            (subCategory) => !subCategory.name.includes(city)
           );
 
           return {
@@ -51,15 +53,13 @@ function filterCategoriesByCity(
   // );
   // writeToFile('./data/business.json', JSON.stringify(businesses, null, 2));
 
-  //await fetchBusinessesAZ(categoriesByLetterTpHCM);
-  await detectLiveEmailAZ(categoriesByLetterTpHCM)
-  //await fetchBusinessesEmailAZ(categoriesByLetterTpHCM); 
-  
+  await fetchBusinessesAZ(categoriesByLetterVN);
+  //await detectLiveEmailAZ(categoriesByLetterTpHCM);
+  //await fetchBusinessesEmailAZ(categoriesByLetterTpHCM);
+
   // filter tphcm for duy 1st
-  //let a = filterCategoriesByCity(categoriesByLetter, 'TPHCM');
+  //let a = filterCategoriesByCity(categoriesByLetter, 'ở');
   //fs.writeFileSync('filteredCategories.json', JSON.stringify(a, null, 2));
-  
 
   //console.log(categoriesByLetter);
-  
 })();
