@@ -1,9 +1,16 @@
+/* eslint-disable max-len */
 import { load } from 'cheerio';
 import './extensions';
 import { Business, Category, HTMLPageResponse } from './interface';
 import { log } from 'console';
 import './utils';
-import { createFolder, readFile, writeToFile } from './utils';
+import {
+  createFolder,
+  isValidEmail,
+  normalizeDistrictName,
+  readFile,
+  writeToFile,
+} from './utils';
 async function fetchHTMLBusiness(
   url: string,
   pageIndex: number
@@ -35,8 +42,8 @@ function parseHTMLBusiness(html: string): Business[] {
   const businesses: Business[] = [];
   $('.yp_noidunglistings').each((index, element) => {
     try {
-      let e = $(element);
-      let isVerify =
+      const e = $(element);
+      const isVerify =
         e.find('span.duocxacthuc')?.text()?.indexOf('Được xác minh') > -1;
       let strDateModified = '';
       if (!isVerify) {
@@ -58,7 +65,7 @@ function parseHTMLBusiness(html: string): Business[] {
             .slice(0, -1);
         else strDateModified = 'Đã Xác Minh & Nhà Tài Trợ';
       }
-      log('strDateModified: %s', strDateModified);
+      //log('strDateModified: %s', strDateModified);
 
       const business: Business = {
         name: e.find('.fs-5.pb-0.text-capitalize').text().trim().clean(),
@@ -96,133 +103,139 @@ function parseHTMLBusiness(html: string): Business[] {
       businesses.push(business);
     } catch (err) {
       log(err);
-      businesses.push();
+      //businesses.push();
     }
   });
   return businesses;
 }
 
 async function fetchJSONAllBusiness(url: string): Promise<Business[]> {
-  let { html, pageCount } = await fetchHTMLBusiness(url, 1);
-  let businesses = parseHTMLBusiness(html);
+  const { html, pageCount } = await fetchHTMLBusiness(url, 1);
+  const businesses = parseHTMLBusiness(html);
   if (pageCount > 1) log('%s', pageCount);
   for (let pageIndex = 2; pageIndex <= pageCount; pageIndex++) {
-    var nextHtml = (await fetchHTMLBusiness(url, pageIndex)).html;
-    var nextBusinesses = parseHTMLBusiness(nextHtml);
+    const nextHtml = (await fetchHTMLBusiness(url, pageIndex)).html;
+    const nextBusinesses = parseHTMLBusiness(nextHtml);
     businesses.push(...nextBusinesses);
   }
   return businesses;
 }
-async function fetchBusinessesAZ(categories :{ [letter: string]: Category[] }): Promise<void> {
+async function fetchBusinessesAZ(categories: {
+  [letter: string]: Category[];
+}): Promise<void> {
   for (
     let letter = 'A';
     letter <= 'Z';
     letter = String.fromCharCode(letter.charCodeAt(0) + 1)
   ) {
     try {
-     let categoryArray = categories[letter];
-     createFolder('./data/business/' + letter)
-     //createFolder('./data/mails/' + letter)
-     for (let category of categoryArray) {
-       try {
-        let businessesOfCategory = await fetchJSONAllBusiness(category.href);
-        writeToFile('./data/business/' + letter + '/' + category.name + '.json', JSON.stringify(businessesOfCategory, null, 2));
-        for(let subCategory of category.subCategories){
-          let businessesOfSubCategories = await fetchJSONAllBusiness(subCategory.href);
-          writeToFile('./data/business/' + letter + '/' + subCategory.name + '.json', JSON.stringify(businessesOfSubCategories, null, 2));
-            // const emailList = businessesOfSubCategories
-            //   .map((business) => business.email)
-            //   .filter((email) => isValidEmail(email))
-            //   .join('\n');
-
-            // function isValidEmail(email: string): boolean {
-            //   // Use a regular expression to validate the email format
-            //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            //   return emailRegex.test(email) && !email.startsWith("...");
-            // }
-
-            // writeToFile('./data/mails/' + letter + '/' + subCategory.name + '.txt', emailList);
+      const categoryArray = categories[letter];
+      createFolder('./data/business/' + letter);
+      for (const category of categoryArray) {
+        try {
+          //if(category.href.indexOf('https://yellowpages.vn/cls/492109/gach-bong-gach-hoa--lat-nen-trang-tri-.html') === -1) continue;
+          const businessesOfCategory = await fetchJSONAllBusiness(category.href);
+          await writeToFile(
+            './data/business/' + letter + '/' + category.name + '.json',
+            JSON.stringify(businessesOfCategory, null, 2)
+          );
+          for (const subCategory of category.subCategories) {
+            const businessesOfSubCategories = await fetchJSONAllBusiness(
+              subCategory.href
+            );
+            await writeToFile(
+              './data/business/' + letter + '/' + subCategory.name + '.json',
+              JSON.stringify(businessesOfSubCategories, null, 2)
+            );
+          }
+        } catch (error) {
+          console.error('Error processing category:', error);
         }
-       } catch (error) {
-         console.error('Error processing category:', error);
-       }
-     }
+      }
     } catch (error) {
       console.error(`Error fetching categories for letter ${letter}:`, error);
     }
   }
 }
-function isValidEmail(email: string): boolean {
-    // Use a regular expression to validate the email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email) && !email.startsWith("...");
-}
-async function getMailFromBusinessAZ(categories: { [letter: string]: Category[] }, city: string, district: string): Promise<void> {
+async function getMailFromBusinessAZ(
+  categories: { [letter: string]: Category[] },
+  city: string,
+  district: string
+): Promise<void> {
   for (
     let letter = 'A';
     letter <= 'Z';
     letter = String.fromCharCode(letter.charCodeAt(0) + 1)
   ) {
-    let emailListLetter = []; 
+    const emailListLetter = [];
     try {
-      let categoryArray = categories[letter];
-      let mailFolder = `./data/mails_${district}/${letter}`
-      createFolder(mailFolder)
-      for (let category of categoryArray) {
+      district = normalizeDistrictName(district);
+      const categoryArray = categories[letter];
+      const mailFolder = `./data/mails/mails_${district}/${letter}`;
+      createFolder(mailFolder);
+      for (const category of categoryArray) {
         try {
-          let businessesOfCategory: Business[] = JSON.parse(await readFile('./data/business/' + letter + '/' + category.name + '.json'));
-          let emailListCategory = [...new Set(businessesOfCategory
-            .filter((business) => business.address.includes(district))
-            .map((business) => business.email)
-            .filter((email) => isValidEmail(email)))];
-          for (let subCategory of category.subCategories) {
-            let businessesOfSubCategories : Business[] = JSON.parse(await readFile('./data/business/' + letter + '/' + subCategory.name + '.json'));
-            const subCategoryEmailList = [...new Set(businessesOfSubCategories
-              .filter((business) => business.address.includes(district))
-              .map((business) => business.email)
-              .filter((email) => isValidEmail(email)))];
+          const businessesOfCategory: Business[] = JSON.parse(
+            await readFile(
+              './data/business/' + letter + '/' + category.name + '.json'
+            )
+          );
+          let emailListCategory = [
+            ...new Set(
+              businessesOfCategory
+                .filter((business) =>
+                  normalizeDistrictName(business.address).includes(district)
+                )
+                .map((business) => business.email)
+                .filter((email) => isValidEmail(email))
+            ),
+          ];
+          for (const subCategory of category.subCategories) {
+            const businessesOfSubCategories: Business[] = JSON.parse(
+              await readFile(
+                './data/business/' + letter + '/' + subCategory.name + '.json'
+              )
+            );
+            const subCategoryEmailList = [
+              ...new Set(
+                businessesOfSubCategories
+                  .filter((business) =>
+                    normalizeDistrictName(business.address).includes(district)
+                  )
+                  .map((business) => business.email)
+                  .filter((email) => isValidEmail(email))
+              ),
+            ];
             emailListCategory.push(...subCategoryEmailList);
           }
           emailListCategory = [...new Set(emailListCategory)];
-          writeToFile(mailFolder +'/' + category.name + '.txt', emailListCategory.join('\n'));
+          await writeToFile(
+            mailFolder +
+              '/' +
+              category.name +
+              '(' +
+              emailListCategory.length +
+              ').txt',
+            emailListCategory.join('\n')
+          );
           emailListLetter.push(...emailListCategory);
         } catch (error) {
           console.error('Error processing category:', error);
         }
       }
-      writeToFile(mailFolder +'/' + letter + '.txt', emailListLetter.join('\n'));
+      await writeToFile(
+        mailFolder + '/' + letter + '(' + emailListLetter.length + ').txt',
+        emailListLetter.join('\n')
+      );
     } catch (error) {
       console.error(`Error fetching categories for letter ${letter}:`, error);
     }
   }
 }
 
-async function getMailFromBusinessAZ2(categories :{ [letter: string]: Category[] }, city: string, district: string): Promise<void> {
-  for (
-    let letter = 'A';
-    letter <= 'B';
-    letter = String.fromCharCode(letter.charCodeAt(0) + 1)
-  ) {
-    try {
-     let categoryArray = categories[letter];
-     for (let category of categoryArray) {
-       try {
-        for(let subCategory of category.subCategories){
-            const emailList = await readFile('./data/mails/' + letter + '/' + subCategory.name + '.txt');
-            const uniqueEmails = [...new Set(emailList.split('\n'))];
-            const duplicateEmails = emailList.split('\n').filter((email, index, arr) => arr.indexOf(email) !== index);
-            log('Unique Emails:');
-            log(uniqueEmails);
-            log('Duplicate Emails:');
-            log(duplicateEmails);
-        }
-       } catch (error) {
-         console.error('Error processing category:', error);
-       }
-     }
-    } catch (error) {
-      console.error(`Error fetching categories for letter ${letter}:`, error);
-    }
-  }
-}
-export { fetchJSONAllBusiness , fetchBusinessesAZ, fetchHTMLBusiness, getMailFromBusinessAZ};
+export {
+  fetchJSONAllBusiness,
+  fetchBusinessesAZ,
+  fetchHTMLBusiness,
+  getMailFromBusinessAZ,
+};

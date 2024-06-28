@@ -9,22 +9,21 @@ interface Category {
 }
 
 interface Business {
-  name: string,
-  isSponsor: boolean,
-  isVerify: boolean,
-  diamondCount: number
-  category: string,
-  dateModified: string,
-  address: string,
-  phone: string,
-  email: string,
-  website: string,
-  intro: string,
-  city: string
+  name: string | null;
+  isSponsor: boolean | null;
+  isVerify: boolean | null;
+  diamondCount: number | null;
+  category: string | null;
+  dateModified: string | null;
+  address: string;
+  phone: string | null;
+  email: string | null;
+  website: string | null;
+  intro: string | null;
+  city: string | null;
 }
 interface HTMLPageResponse {
   html: string;
   pageCount: number;
 }
-export {Category, SubCategory, HTMLPageResponse, Business}
-
+export { Category, SubCategory, HTMLPageResponse, Business };

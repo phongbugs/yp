@@ -2,7 +2,8 @@ import { Category, SubCategory } from './interface';
 import { load } from 'cheerio';
 import './extensions';
 import { log } from 'console';
-import { writeToFile } from './utils';
+import { createFolder, writeToFile } from './utils';
+import { create } from 'lodash';
 
 async function fetchHTMLSubCategory(url: string): Promise<string> {
   try {
@@ -40,7 +41,7 @@ function parseHTMLSubCategories(html: string): SubCategory[] {
       name: $(element).find('a').text().trim().clean(),
       href: $(element).find('a').attr('href'),
     };
-    if (category.name && category.href) subCategories.push(category);
+    if (category.name && category.name.indexOf('ở') === -1 && category.href) subCategories.push(category);
   });
   return subCategories;
 }
@@ -55,7 +56,9 @@ async function appendSubCategory(categoriesByLetter: {
     for (let category of categoryArray) {
       try {
         let html = await fetchHTMLSubCategory(category.href);
-        writeToFile(category.href.split('/').pop(), html);
+        let folderHtml = './data/html/'+ letter + '/'
+        createFolder(folderHtml);
+        writeToFile(folderHtml + category.href.split('/').pop(), html);
         subCategories = parseHTMLSubCategories(html);
         categoriesByLetter[letter][subCategoryIndex].subCategories =
           subCategories;
@@ -64,6 +67,7 @@ async function appendSubCategory(categoriesByLetter: {
         console.error('Error processing category:', error);
       }
     }
+    //createFolder('./data/category');
     writeToFile('./data/category/' + letter + '.json', JSON.stringify(categoriesByLetter[letter], null, 2));
   }
   // Return the modified categoriesByLetter object
