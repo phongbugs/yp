@@ -134,5 +134,6 @@ dist
 # Build distribution directory
 dist/
 data/html/
-data/business*
-data/
+data/business/*
+data/mails/*
+data/bin.7z
