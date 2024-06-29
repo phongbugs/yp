@@ -15,10 +15,10 @@
   ],
   "rules": {
     "no-console": 0,
-    "indent": [
-      "error",
-      2
-    ],
+    "indent": [2, 2, {
+      "SwitchCase": 1,
+      "offsetTernaryExpressions": true
+    }],
     "quotes": [
       "error",
       "single"

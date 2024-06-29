@@ -1,10 +1,22 @@
+import * as fsExtra from 'fs-extra';
 import * as fs from 'fs';
+import path from 'path';
+const ensureDirectoryExistence = (filePath: string) => {
+  const dirname = path.dirname(filePath);
+  if (fsExtra.existsSync(dirname)) {
+    return true;
+  }
+  fsExtra.mkdirpSync(dirname);
+};
+
 async function writeToFile(
   fileName: string,
   data: string,
   callback: ((error: NodeJS.ErrnoException | null) => void) | null = null
 ): Promise<void> {
+  //if (fs.existsSync(fileName)) return;
   try {
+    ensureDirectoryExistence(fileName);
     await fs.promises.writeFile(fileName, data);
     //console.log(`${fileName} has been successfully written!`);
     if (callback) {
@@ -41,6 +53,7 @@ async function createFolder(directoryPath) {
   }
 }
 async function readFile(fileName: string): Promise<string> {
+  if (fileName.indexOf('/') > -1) fileName = fileName.replace(/\//g, '\\');
   try {
     const data = await fs.promises.readFile(fileName, 'utf-8');
     //console.log(`${fileName} has been successfully read!`);
@@ -52,7 +65,7 @@ async function readFile(fileName: string): Promise<string> {
 }
 
 function normalizeDistrictName(district) {
-  if(district.indexOf('Quận') === -1) return district;
+  if (district.indexOf('Quận') === -1) return district;
   return district.replace(/Quận\s?(\d+)/i, 'Q. $1');
 }
 
@@ -62,4 +75,4 @@ function isValidEmail(email: string): boolean {
   return emailRegex.test(email) && !email.startsWith('...');
 }
 
-export { writeToFile, createFolder , readFile, normalizeDistrictName, isValidEmail};
+export { writeToFile, createFolder, readFile, normalizeDistrictName, isValidEmail };
